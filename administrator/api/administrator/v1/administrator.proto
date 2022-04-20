@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.administrator.v1;
+
+option go_package = "administrator/api/administrator/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.administrator.v1";
+
+service Administrator {
+	rpc CreateAdministrator (CreateAdministratorRequest) returns (CreateAdministratorReply);
+	rpc UpdateAdministrator (UpdateAdministratorRequest) returns (UpdateAdministratorReply);
+	rpc DeleteAdministrator (DeleteAdministratorRequest) returns (DeleteAdministratorReply);
+	rpc GetAdministrator (GetAdministratorRequest) returns (GetAdministratorReply);
+	rpc ListAdministrator (ListAdministratorRequest) returns (ListAdministratorReply);
+}
+
+message CreateAdministratorRequest {}
+message CreateAdministratorReply {}
+
+message UpdateAdministratorRequest {}
+message UpdateAdministratorReply {}
+
+message DeleteAdministratorRequest {}
+message DeleteAdministratorReply {}
+
+message GetAdministratorRequest {}
+message GetAdministratorReply {}
+
+message ListAdministratorRequest {}
+message ListAdministratorReply {}
