@@ -6,37 +6,36 @@ import (
 	v1 "admin/api/admin/v1"
 	"admin/internal/conf"
 
-
 	"github.com/golang-jwt/jwt/v4"
 )
 
 type AuthUseCase struct {
-	key      string
+	key               string
 	administratorRepo AdministratorRepo
 }
 
 func NewAuthUseCase(conf *conf.Auth, administratorRepo AdministratorRepo) *AuthUseCase {
 	return &AuthUseCase{
-		key:      conf.ApiKey,
+		key:               conf.ApiKey,
 		administratorRepo: administratorRepo,
 	}
 }
 
 func (receiver *AuthUseCase) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginReply, error) {
 
-	// get user
+	// 获取用户
 	user, err := receiver.administratorRepo.FindAdministratorByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, v1.ErrorLoginFailed("user not found: %s", err.Error())
 	}
 	// check permission(password blacklist etc...)
-	err = receiver.userRepo.VerifyPassword(ctx, user, req.Password)
-	if err != nil {
-		return nil, v1.ErrorLoginFailed("password not match")
-	}
+	//err = receiver.userRepo.VerifyPassword(ctx, user, req.Password)
+	//if err != nil {
+	//	return nil, v1.ErrorLoginFailed("password not match")
+	//}
 	// generate token
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.Id,
+		"user_id": user.ID,
 	})
 	signedString, err := claims.SignedString([]byte(receiver.key))
 	if err != nil {
