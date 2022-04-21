@@ -20,7 +20,7 @@ import (
 // go build -ldflags "-X main.Version=x.y.z"
 var (
 	// Name is the name of the compiled software.
-	Name = "beer.shop.interface"
+	Name = "kratos-base-project.admin.interface"
 	// Version is the version of the compiled software.
 	Version string
 	// flagconf is the config flag.
@@ -76,6 +76,7 @@ func main() {
 	if err := c.Scan(&rc); err != nil {
 		panic(err)
 	}
+
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(bc.Trace.Endpoint)))
 	if err != nil {
 		panic(err)
@@ -86,6 +87,7 @@ func main() {
 			semconv.ServiceNameKey.String(Name),
 		)),
 	)
+
 
 	app, cleanup, err := wireApp(bc.Server, &rc, bc.Data, bc.Auth, logger, tp)
 	if err != nil {

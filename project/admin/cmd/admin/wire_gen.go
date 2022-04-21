@@ -21,7 +21,9 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, registry *conf.Registry, confData *conf.Data, auth *conf.Auth, logger log.Logger, tracerProvider *trace.TracerProvider) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+	discovery := data.NewDiscovery(registry)
+	administratorClient := data.NewAdministratorServiceClient(auth, discovery, tracerProvider)
+	dataData, err := data.NewData(confData, logger, administratorClient)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -33,6 +35,5 @@ func wireApp(confServer *conf.Server, registry *conf.Registry, confData *conf.Da
 	grpcServer := server.NewGRPCServer(confServer, adminInterface, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
-		cleanup()
 	}, nil
 }

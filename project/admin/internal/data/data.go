@@ -4,6 +4,7 @@ import (
 	administratorClientV1 "admin/api/administrator/v1"
 	"admin/internal/conf"
 	"context"
+	"fmt"
 	consul "github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
@@ -21,8 +22,8 @@ import (
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData,
-	NewDiscovery,
 	NewRegistrar,
+	NewDiscovery,
 	NewAdministratorServiceClient,
 	NewAdministratorRepo,
 )
@@ -34,14 +35,20 @@ type Data struct {
 }
 
 // NewData .
-func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
-	cleanup := func() {
-		log.NewHelper(logger).Info("closing the data resources")
-	}
-	return &Data{}, cleanup, nil
+func NewData(
+	conf *conf.Data,
+	logger log.Logger,
+	administratorClient administratorClientV1.AdministratorClient,
+) (*Data, error) {
+	l := log.NewHelper(log.With(logger, "module", "data"))
+	return &Data{
+		log: l,
+		administratorClient: administratorClient,
+	}, nil
 }
 
 func NewDiscovery(conf *conf.Registry) registry.Discovery {
+	fmt.Println("NewDiscovery")
 	c := consulAPI.DefaultConfig()
 	c.Address = conf.Consul.Address
 	c.Scheme = conf.Consul.Scheme
@@ -54,6 +61,7 @@ func NewDiscovery(conf *conf.Registry) registry.Discovery {
 }
 
 func NewRegistrar(conf *conf.Registry) registry.Registrar {
+	fmt.Println("NewRegistrar")
 	c := consulAPI.DefaultConfig()
 	c.Address = conf.Consul.Address
 	c.Scheme = conf.Consul.Scheme
