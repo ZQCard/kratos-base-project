@@ -1,0 +1,20 @@
+trace:
+  endpoint: http://124.222.172.237:14268/api/traces
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: root:dangerous@tcp(127.0.0.1:3306)/test?parseTime=true
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+auth:
+  service_key: "kratos-base-project-admin-service-key"
+  api_key: "kratos-base-project-admin-api-key"
