@@ -10,19 +10,19 @@ import (
 	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"github.com/ZQCard/kratos-base-project/app/admin/service/internal/conf"
+	"github.com/ZQCard/kratos-base-project/app/administrator/service/internal/conf"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
 var (
 	// Name is the name of the compiled software.
-	Name = "kratos-base-project.admin.interface"
+	Name = "kratos-base-project.administrator.service"
 	// Version is the version of the compiled software.
 	Version string
 	// flagconf is the config flag.
@@ -35,7 +35,7 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger log.Logger, hs *http.Server, rr registry.Registrar) *kratos.App {
+func newApp(logger log.Logger, gs *grpc.Server, rr registry.Registrar) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -43,7 +43,7 @@ func newApp(logger log.Logger, hs *http.Server, rr registry.Registrar) *kratos.A
 		kratos.Metadata(map[string]string{}),
 		kratos.Logger(logger),
 		kratos.Server(
-			hs,
+			gs,
 		),
 		kratos.Registrar(rr),
 	)

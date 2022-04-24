@@ -59,7 +59,7 @@ func NewHTTPServer(c *conf.Server, service *service.AdminInterface, tp *tracesdk
 				Path(
 
 				).Build(),
-			getOperation(),
+			//getOperation(),
 		),
 		// 跨域设置
 		http.Filter(handlers.CORS(

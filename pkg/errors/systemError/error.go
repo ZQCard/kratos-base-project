@@ -1,4 +1,4 @@
-package system
+package systemError
 
 import "github.com/go-kratos/kratos/v2/errors"
 

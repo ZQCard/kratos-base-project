@@ -7,6 +7,8 @@ option go_package = "github.com/ZQCard/kratos-base-project/api/administrator/v1;
 service Administrator {
 	rpc GetAdministratorByUsername(GetAdministratorByUsernameRequest) returns (GetAdministratorByUsernameReply);
 	rpc VerifyPassword(VerifyPasswordRequest) returns (VerifyPasswordReply);
+	rpc GetAdministrator(GetAdministratorRequest) returns (GetAdministratorReply);
+
 }
 
 message GetAdministratorByUsernameRequest {
@@ -20,7 +22,7 @@ message GetAdministratorByUsernameReply {
 	string mobile = 5;
 	string nickname = 6;
 	string avatar = 7;
-	string status = 8;
+	int64 status = 8;
 	string created_at = 9;
 	string updated_at = 10;
 	string deleted_at = 11;
@@ -34,4 +36,23 @@ message VerifyPasswordRequest {
 message VerifyPasswordReply {
 	int64 id = 1;
 	bool success = 2;
+}
+
+message GetAdministratorRequest {
+	int64 id = 1;
+	string username = 2;
+	string mobile = 3;
+	string nickname = 4;
+}
+message GetAdministratorReply {
+	int64 id = 1;
+	string username = 2;
+	string password = 3;
+	string mobile = 4;
+	string nickname = 5;
+	string avatar = 6;
+	int64 status = 7;
+	string created_at = 8;
+	string updated_at = 9;
+	string deleted_at = 10;
 }

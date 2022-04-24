@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	administratorClientV1 "github.com/ZQCard/kratos-base-project/api/administrator/v1"
-	"github.com/ZQCard/kratos-base-project/pkg/errors/system"
+	"github.com/ZQCard/kratos-base-project/pkg/errors/systemError"
 	"github.com/go-kratos/kratos/v2/log"
 	"golang.org/x/sync/singleflight"
 
@@ -24,8 +24,7 @@ func (rp administratorRepo) FindAdministratorByUsername(ctx context.Context, use
 			Username: username,
 		})
 		if err != nil {
-			rp.log.Error("system error : administrator service error : "+err.Error() )
-			return nil, system.SystemError
+			return nil, err
 		}
 		return &biz.Administrator{
 			Id:       user.Id,
@@ -44,8 +43,8 @@ func (rp administratorRepo) VerifyPassword(ctx context.Context, id int64, passwo
 			Password: password,
 		})
 		if err != nil {
-			rp.log.Error("system error : administrator service error : "+err.Error() )
-			return system.SystemError
+			rp.log.Error("systemError error : administrator service error : "+err.Error() )
+			return systemError.SystemError
 		}
 
 		if reply.Success == false {

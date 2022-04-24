@@ -5,13 +5,13 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 
-	v1 "github.com/ZQCard/kratos-base-project/api/admin/v1"
-	"github.com/ZQCard/kratos-base-project/app/admin/service/internal/conf"
-	"github.com/ZQCard/kratos-base-project/app/admin/service/internal/service"
+	v1 "github.com/ZQCard/kratos-base-project/api/administrator/v1"
+	"github.com/ZQCard/kratos-base-project/app/administrator/service/internal/conf"
+	"github.com/ZQCard/kratos-base-project/app/administrator/service/internal/service"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, service *service.AdminInterface, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, service *service.AdministratorService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -27,6 +27,6 @@ func NewGRPCServer(c *conf.Server, service *service.AdminInterface, logger log.L
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterAdminServer(srv, service)
+	v1.RegisterAdministratorServer(srv, service)
 	return srv
 }
