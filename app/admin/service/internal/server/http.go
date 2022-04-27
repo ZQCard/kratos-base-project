@@ -3,15 +3,16 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/ZQCard/kratos-base-project/pkg/middleware/jwt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	jwt2 "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/handlers"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 
@@ -23,8 +24,7 @@ import (
 func NewWhiteListMatcher() selector.MatchFunc {
 
 	whiteList := make(map[string]struct{})
-	whiteList["/shop.interface.v1.ShopInterface/Login"] = struct{}{}
-	whiteList["/shop.interface.v1.ShopInterface/Register"] = struct{}{}
+	whiteList["/api.admin.v1.Admin/Login"] = struct{}{}
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false
@@ -33,6 +33,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	}
 }
 
+// 获取当前服务operation
 func getOperation() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -44,8 +45,27 @@ func getOperation() middleware.Middleware {
 	}
 }
 
+// 设置全局参数
+func setGlobalData() middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			claim, _ := jwt.FromContext(ctx)
+			if claim == nil {
+				return handler(ctx, req)
+			}
+			claimInfo := claim.(jwt2.MapClaims)
+			AdministratorId := int64(claimInfo["AdministratorId"].(float64))
+			ctx = context.WithValue(ctx, "kratos-AdministratorId", AdministratorId)
+			ctx = context.WithValue(ctx, "kratos-AdministratorUsername", claimInfo["AdministratorUsername"])
+			return handler(ctx, req)
+		}
+	}
+}
+
+
+
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, service *service.AdminInterface, tp *tracesdk.TracerProvider,logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, ac *conf.Auth, service *service.AdminInterface, tp *tracesdk.TracerProvider,logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -54,12 +74,18 @@ func NewHTTPServer(c *conf.Server, service *service.AdminInterface, tp *tracesdk
 			// 日志记录
 			logging.Server(logger),
 			// 对于需要登录的路由进行jwt中间件验证
-			selector.Server(jwt.AuthMiddleware()).
-				//Prefix("/").
-				Path(
-
-				).Build(),
-			//getOperation(),
+			selector.Server(
+				jwt.Server(func(token *jwt2.Token) (interface{}, error) {
+					return []byte(ac.ApiKey), nil
+				},
+				jwt.WithSigningMethod(jwt2.SigningMethodHS256),
+				jwt.WithClaims(func() jwt2.Claims {
+					return jwt2.MapClaims{}
+				})),
+			).
+			Match(NewWhiteListMatcher()).
+			Build(),
+			setGlobalData(),
 		),
 		// 跨域设置
 		http.Filter(handlers.CORS(

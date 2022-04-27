@@ -7,12 +7,17 @@ import (
 )
 
 
-func (s *AdministratorService) GetAdministratorByUsername(ctx context.Context, req *pb.GetAdministratorByUsernameRequest) (*pb.GetAdministratorByUsernameReply, error) {
-	return s.administratorCase.FindAdministratorByUsername(ctx, req)
+func (s *AdministratorService) GetLoginAdministratorByUsername(ctx context.Context, req *pb.GetLoginAdministratorByUsernameRequest) (*pb.GetLoginAdministratorByUsernameReply, error) {
+	return s.administratorCase.FindLoginAdministratorByUsername(ctx, req)
 }
+
 func (s *AdministratorService) VerifyPassword(ctx context.Context, req *pb.VerifyPasswordRequest) (*pb.VerifyPasswordReply, error) {
-	return &pb.VerifyPasswordReply{}, nil
+	res, err := s.administratorCase.VerifyAdministratorPassword(ctx, req)
+	return &pb.VerifyPasswordReply{
+		Success: res,
+	}, err
 }
+
 func (s *AdministratorService) GetAdministrator(ctx context.Context, req *pb.GetAdministratorRequest) (*pb.GetAdministratorReply, error) {
-	return &pb.GetAdministratorReply{}, nil
+	return s.administratorCase.FindAdministratorById(ctx, req.Id)
 }

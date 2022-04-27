@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdministratorClient interface {
-	GetAdministratorByUsername(ctx context.Context, in *GetAdministratorByUsernameRequest, opts ...grpc.CallOption) (*GetAdministratorByUsernameReply, error)
+	GetLoginAdministratorByUsername(ctx context.Context, in *GetLoginAdministratorByUsernameRequest, opts ...grpc.CallOption) (*GetLoginAdministratorByUsernameReply, error)
 	VerifyPassword(ctx context.Context, in *VerifyPasswordRequest, opts ...grpc.CallOption) (*VerifyPasswordReply, error)
 	GetAdministrator(ctx context.Context, in *GetAdministratorRequest, opts ...grpc.CallOption) (*GetAdministratorReply, error)
 }
@@ -35,9 +35,9 @@ func NewAdministratorClient(cc grpc.ClientConnInterface) AdministratorClient {
 	return &administratorClient{cc}
 }
 
-func (c *administratorClient) GetAdministratorByUsername(ctx context.Context, in *GetAdministratorByUsernameRequest, opts ...grpc.CallOption) (*GetAdministratorByUsernameReply, error) {
-	out := new(GetAdministratorByUsernameReply)
-	err := c.cc.Invoke(ctx, "/api.administrator.v1.Administrator/GetAdministratorByUsername", in, out, opts...)
+func (c *administratorClient) GetLoginAdministratorByUsername(ctx context.Context, in *GetLoginAdministratorByUsernameRequest, opts ...grpc.CallOption) (*GetLoginAdministratorByUsernameReply, error) {
+	out := new(GetLoginAdministratorByUsernameReply)
+	err := c.cc.Invoke(ctx, "/api.administrator.v1.Administrator/GetLoginAdministratorByUsername", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *administratorClient) GetAdministrator(ctx context.Context, in *GetAdmin
 // All implementations must embed UnimplementedAdministratorServer
 // for forward compatibility
 type AdministratorServer interface {
-	GetAdministratorByUsername(context.Context, *GetAdministratorByUsernameRequest) (*GetAdministratorByUsernameReply, error)
+	GetLoginAdministratorByUsername(context.Context, *GetLoginAdministratorByUsernameRequest) (*GetLoginAdministratorByUsernameReply, error)
 	VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordReply, error)
 	GetAdministrator(context.Context, *GetAdministratorRequest) (*GetAdministratorReply, error)
 	mustEmbedUnimplementedAdministratorServer()
@@ -76,8 +76,8 @@ type AdministratorServer interface {
 type UnimplementedAdministratorServer struct {
 }
 
-func (UnimplementedAdministratorServer) GetAdministratorByUsername(context.Context, *GetAdministratorByUsernameRequest) (*GetAdministratorByUsernameReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAdministratorByUsername not implemented")
+func (UnimplementedAdministratorServer) GetLoginAdministratorByUsername(context.Context, *GetLoginAdministratorByUsernameRequest) (*GetLoginAdministratorByUsernameReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLoginAdministratorByUsername not implemented")
 }
 func (UnimplementedAdministratorServer) VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyPassword not implemented")
@@ -98,20 +98,20 @@ func RegisterAdministratorServer(s grpc.ServiceRegistrar, srv AdministratorServe
 	s.RegisterService(&Administrator_ServiceDesc, srv)
 }
 
-func _Administrator_GetAdministratorByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAdministratorByUsernameRequest)
+func _Administrator_GetLoginAdministratorByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLoginAdministratorByUsernameRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdministratorServer).GetAdministratorByUsername(ctx, in)
+		return srv.(AdministratorServer).GetLoginAdministratorByUsername(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.administrator.v1.Administrator/GetAdministratorByUsername",
+		FullMethod: "/api.administrator.v1.Administrator/GetLoginAdministratorByUsername",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdministratorServer).GetAdministratorByUsername(ctx, req.(*GetAdministratorByUsernameRequest))
+		return srv.(AdministratorServer).GetLoginAdministratorByUsername(ctx, req.(*GetLoginAdministratorByUsernameRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -160,8 +160,8 @@ var Administrator_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AdministratorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetAdministratorByUsername",
-			Handler:    _Administrator_GetAdministratorByUsername_Handler,
+			MethodName: "GetLoginAdministratorByUsername",
+			Handler:    _Administrator_GetLoginAdministratorByUsername_Handler,
 		},
 		{
 			MethodName: "VerifyPassword",

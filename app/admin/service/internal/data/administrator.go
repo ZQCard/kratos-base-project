@@ -18,9 +18,35 @@ type administratorRepo struct {
 	sg   *singleflight.Group
 }
 
-func (rp administratorRepo) FindAdministratorByUsername(ctx context.Context, username string) (*biz.Administrator, error) {
+func (rp administratorRepo) GetAdministrator(ctx context.Context, id int64) (*biz.Administrator, error) {
+	result, err, _ := rp.sg.Do(fmt.Sprintf("find_user_by_id_%s", id), func() (interface{}, error) {
+		user, err := rp.data.administratorClient.GetAdministrator(ctx, &administratorClientV1.GetAdministratorRequest{
+			Id: id,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return &biz.Administrator{
+			Id:        user.Id,
+			Username:  user.Username,
+			Mobile:    user.Mobile,
+			Nickname:  user.Mobile,
+			Avatar:    user.Avatar,
+			Status:    user.Status,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			DeletedAt: user.DeletedAt,
+		}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*biz.Administrator), nil
+}
+
+func (rp administratorRepo) FindLoginAdministratorByUsername(ctx context.Context, username string) (*biz.Administrator, error) {
 	result, err, _ := rp.sg.Do(fmt.Sprintf("find_user_by_name_%s", username), func() (interface{}, error) {
-		user, err := rp.data.administratorClient.GetAdministratorByUsername(ctx, &administratorClientV1.GetAdministratorByUsernameRequest{
+		user, err := rp.data.administratorClient.GetLoginAdministratorByUsername(ctx, &administratorClientV1.GetLoginAdministratorByUsernameRequest{
 			Username: username,
 		})
 		if err != nil {
@@ -43,7 +69,6 @@ func (rp administratorRepo) VerifyPassword(ctx context.Context, id int64, passwo
 			Password: password,
 		})
 		if err != nil {
-			rp.log.Error("systemError error : administrator service error : "+err.Error() )
 			return systemError.SystemError
 		}
 

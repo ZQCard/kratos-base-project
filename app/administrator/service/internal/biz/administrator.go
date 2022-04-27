@@ -6,9 +6,8 @@ import (
 	"github.com/ZQCard/kratos-base-project/app/administrator/service/internal/data/model"
 	"github.com/ZQCard/kratos-base-project/pkg/errors/administratorError"
 	"github.com/ZQCard/kratos-base-project/pkg/errors/systemError"
-	"gorm.io/gorm"
-
 	"github.com/go-kratos/kratos/v2/log"
+	"gorm.io/gorm"
 
 	v1 "github.com/ZQCard/kratos-base-project/api/administrator/v1"
 )
@@ -28,9 +27,8 @@ type Administrator struct {
 }
 
 type AdministratorRepo interface {
-	FindAdministratorByUsername(ctx context.Context, username string) (*Administrator, error)
-	VerifyPassword(ctx context.Context, id int64, password string) error
-	GetAdministrator(ctx context.Context, id int64,administrator Administrator)  (*Administrator, error)
+	VerifyPassword(ctx context.Context, id int64, password string) (bool, error)
+	GetAdministrator(ctx context.Context, params map[string]interface{})  (*Administrator, error)
 }
 
 type AdministratorUseCase struct {
@@ -46,22 +44,48 @@ func NewAdministratorUseCase(repo AdministratorRepo, logger log.Logger) *Adminis
 	}
 }
 
-func (ac AdministratorUseCase)FindAdministratorByUsername(ctx context.Context, in *v1.GetAdministratorByUsernameRequest) (*v1.GetAdministratorByUsernameReply, error) {
-	administrator, err := ac.repo.FindAdministratorByUsername(ctx, in.Username)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &v1.GetAdministratorByUsernameReply{}, administratorError.AdministratorNotExist
-	}
+func (ac AdministratorUseCase)FindLoginAdministratorByUsername(ctx context.Context, in *v1.GetLoginAdministratorByUsernameRequest) (*v1.GetLoginAdministratorByUsernameReply, error) {
+	params := make(map[string]interface{})
+	params["username"] = in.Username
+	administrator, err := ac.repo.GetAdministrator(ctx, params)
 	if err != nil {
-		return &v1.GetAdministratorByUsernameReply{}, systemError.SystemError
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &v1.GetLoginAdministratorByUsernameReply{}, administratorError.AdministratorNotExist
+		}
+		return &v1.GetLoginAdministratorByUsernameReply{}, systemError.SystemError
 	}
 	if administrator.Status == model.AdministratorStatusForbid {
-		return &v1.GetAdministratorByUsernameReply{}, administratorError.AdministratorForbid
+		return &v1.GetLoginAdministratorByUsernameReply{}, administratorError.AdministratorForbid
 	}
 	if administrator.DeletedAt != "" {
-		return &v1.GetAdministratorByUsernameReply{}, administratorError.AdministratorDeleted
+		return &v1.GetLoginAdministratorByUsernameReply{}, administratorError.AdministratorDeleted
 	}
 
-	return &v1.GetAdministratorByUsernameReply{
+	return &v1.GetLoginAdministratorByUsernameReply{
+		Id:        administrator.Id,
+		Username:  administrator.Username,
+	}, nil
+}
+
+
+func (ac AdministratorUseCase)FindAdministratorById(ctx context.Context, id int64) (*v1.GetAdministratorReply, error) {
+	params := make(map[string]interface{})
+	params["id"] = id
+	administrator, err := ac.repo.GetAdministrator(ctx, params)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &v1.GetAdministratorReply{}, administratorError.AdministratorNotExist
+		}
+		return &v1.GetAdministratorReply{}, systemError.SystemError
+	}
+	if administrator.Status == model.AdministratorStatusForbid {
+		return &v1.GetAdministratorReply{}, administratorError.AdministratorForbid
+	}
+	if administrator.DeletedAt != "" {
+		return &v1.GetAdministratorReply{}, administratorError.AdministratorDeleted
+	}
+
+	return &v1.GetAdministratorReply{
 		Id:        administrator.Id,
 		Username:  administrator.Username,
 		Password:  administrator.Password,
@@ -73,5 +97,14 @@ func (ac AdministratorUseCase)FindAdministratorByUsername(ctx context.Context, i
 		UpdatedAt: administrator.UpdatedAt,
 		DeletedAt: administrator.DeletedAt,
 	}, nil
-	return nil, nil
+}
+
+
+
+func (ac AdministratorUseCase)VerifyAdministratorPassword(ctx context.Context, in *v1.VerifyPasswordRequest) (bool, error) {
+	result, err := ac.repo.VerifyPassword(ctx, in.Id, in.Password)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, systemError.SystemError
+	}
+	return result, nil
 }

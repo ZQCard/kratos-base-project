@@ -26,6 +26,8 @@ type AdminClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginReply, error)
 	// 管理员退出
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutReply, error)
+	// 获取管理员信息
+	GetAdministratorInfo(ctx context.Context, in *GetAdministratorInfoRequest, opts ...grpc.CallOption) (*GetAdministratorInfoReply, error)
 }
 
 type adminClient struct {
@@ -54,6 +56,15 @@ func (c *adminClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grp
 	return out, nil
 }
 
+func (c *adminClient) GetAdministratorInfo(ctx context.Context, in *GetAdministratorInfoRequest, opts ...grpc.CallOption) (*GetAdministratorInfoReply, error) {
+	out := new(GetAdministratorInfoReply)
+	err := c.cc.Invoke(ctx, "/api.admin.v1.Admin/GetAdministratorInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
@@ -62,6 +73,8 @@ type AdminServer interface {
 	Login(context.Context, *LoginRequest) (*LoginReply, error)
 	// 管理员退出
 	Logout(context.Context, *LogoutRequest) (*LogoutReply, error)
+	// 获取管理员信息
+	GetAdministratorInfo(context.Context, *GetAdministratorInfoRequest) (*GetAdministratorInfoReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -74,6 +87,9 @@ func (UnimplementedAdminServer) Login(context.Context, *LoginRequest) (*LoginRep
 }
 func (UnimplementedAdminServer) Logout(context.Context, *LogoutRequest) (*LogoutReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedAdminServer) GetAdministratorInfo(context.Context, *GetAdministratorInfoRequest) (*GetAdministratorInfoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAdministratorInfo not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -124,6 +140,24 @@ func _Admin_Logout_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_GetAdministratorInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAdministratorInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetAdministratorInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.v1.Admin/GetAdministratorInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetAdministratorInfo(ctx, req.(*GetAdministratorInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -138,6 +172,10 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _Admin_Logout_Handler,
+		},
+		{
+			MethodName: "GetAdministratorInfo",
+			Handler:    _Admin_GetAdministratorInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -31,7 +31,7 @@ func wireApp(confServer *conf.Server, registry *conf.Registry, confData *conf.Da
 	administratorUseCase := biz.NewAdministratorUseCase(administratorRepo, logger)
 	authUseCase := biz.NewAuthUseCase(auth, administratorRepo)
 	adminInterface := service.NewAdminInterface(administratorUseCase, authUseCase, logger)
-	httpServer := server.NewHTTPServer(confServer, adminInterface, tracerProvider, logger)
+	httpServer := server.NewHTTPServer(confServer, auth, adminInterface, tracerProvider, logger)
 	registrar := data.NewRegistrar(registry)
 	app := newApp(logger, httpServer, registrar)
 	return app, func() {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
@@ -89,7 +88,6 @@ func main() {
 			semconv.ServiceNameKey.String(Name),
 		)),
 	)
-
 	app, cleanup, err := wireApp(bc.Server, &rc, bc.Data, bc.Auth, logger, tp)
 	if err != nil {
 		panic(err)

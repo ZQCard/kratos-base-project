@@ -24,7 +24,7 @@ func NewAuthUseCase(conf *conf.Auth, administratorRepo AdministratorRepo) *AuthU
 func (receiver *AuthUseCase) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginReply, error) {
 
 	// 获取用户
-	user, err := receiver.administratorRepo.FindAdministratorByUsername(ctx, req.Username)
+	user, err := receiver.administratorRepo.FindLoginAdministratorByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +34,12 @@ func (receiver *AuthUseCase) Login(ctx context.Context, req *v1.LoginRequest) (*
 		return nil,  err
 	}
 	// 生成token
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.Id,
-	})
+	claims := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"AdministratorId": user.Id,
+			"AdministratorUsername": user.Username,
+		})
 	signedString, err := claims.SignedString([]byte(receiver.key))
 	if err != nil {
 		return nil, errors.New("error")

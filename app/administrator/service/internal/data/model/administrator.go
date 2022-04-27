@@ -18,7 +18,7 @@ type Administrator struct {
 	Status      int64
 	CreatedAt   *time.Time
 	UpdatedAt   *time.Time
-	DeletedAt int64
+	DeletedAt   int64
 }
 
 func (Administrator) TableName() string {

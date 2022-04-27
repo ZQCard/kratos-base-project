@@ -38,7 +38,7 @@ func NewData(db *gorm.DB, redisCmd redis.Cmdable, logger log.Logger) (*Data, fun
 	logs := log.NewHelper(log.With(logger, "module", "administrator-service/data"))
 
 	d := &Data{
-		db:       db,
+		db:       db.Debug(),
 		redisCli: redisCmd,
 	}
 	return d, func() {
