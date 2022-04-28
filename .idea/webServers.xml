@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8c352517-561a-443f-890b-77a6532c974d" name="kratos">
+        <fileTransfer accessType="SFTP" host="121.41.201.112" port="22" sshConfigId="c324e386-61bd-4aac-9b0d-c1d36f135a67" sshConfig="root@121.41.201.112:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
